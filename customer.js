@@ -1,5 +1,5 @@
 const client = require('./client');
-const express = require('express'); 
+const express = require('express');
 const customerRouter = express.Router();
 
 async function run() {
@@ -8,9 +8,24 @@ async function run() {
         await client.connect();
 
 
-             
-         
+        const usersCollection = client.db('threadZone').collection('users')
 
+        // customerRouter.route("/instructor")
+        // .get(async (req, res) => {
+        //       const result = await instructorCollection.find().toArray();
+        //       res.send(result);
+        //     })
+        customerRouter.route('/users')
+            .post(async (req, res) => {
+                const user = req.body;
+                const query = { email: user.email }
+                const existingUser = await usersCollection.findOne(query)
+                if (existingUser) {
+                    return res.send({ message: 'user already exists' })
+                }
+                const result = await usersCollection.insertOne(user);
+                res.send(result)
+            })
 
 
 
