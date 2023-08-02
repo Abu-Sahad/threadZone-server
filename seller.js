@@ -1,11 +1,14 @@
+const { ObjectId } = require('mongodb');
 const client = require('./client');
-const express = require('express'); 
+const express = require('express');
 const sellerRouter = express.Router();
 
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+        const usersCollection = client.db('threadZone').collection('users')
+
 
       const shop = client.db('threadZone').collection('shops');
 
@@ -18,6 +21,30 @@ async function run() {
       })
              
          
+
+        sellerRouter.route('/users/seller/:id')
+            .patch(async (req, res) => {
+                const id = req.params.id;
+                const filter = { _id: new ObjectId(id) }
+                const updatedDoc = {
+                    $set: {
+                        role: 'seller'
+                    },
+                };
+                const result = await usersCollection.updateOne(filter, updatedDoc);
+                res.send(result)
+            });
+
+        sellerRouter.route('/users/seller/:email')
+            .get(async (req, res) => {
+                const email = req.params.email;
+                const query = { email: email }
+                const user = await usersCollection.findOne(query);
+                const result = { seller: user?.role === 'seller' }
+                res.send(result);
+            })
+
+
 
 
 
