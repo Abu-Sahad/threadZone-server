@@ -7,7 +7,15 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+      const shop = client.db('threadZone').collection('shops');
 
+      sellerRouter.route("/addShop")
+      .post(async(req,res)=>{
+        //const data = req.body;
+        await shop.insertOne(data);
+        console.log("add review ",data);
+        res.send({status:true});
+      })
              
          
 
