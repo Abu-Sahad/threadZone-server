@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const client = require('./client');
 const express = require('express');
 const customerRouter = express.Router();
@@ -7,15 +8,28 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
-
-        const usersCollection = client.db('threadZone').collection('users')
+        const orderList = client.db('threadZone').collection('orders');
+           const usersCollection = client.db('threadZone').collection('users')
         const galleryCollection = client.db('threadZone').collection('gallery')
+        
 
-        // customerRouter.route("/instructor")
-        // .get(async (req, res) => {
-        //       const result = await instructorCollection.find().toArray();
-        //       res.send(result);
-        //     })
+
+  // ryd start 
+  customerRouter.route('/getAllProduct')
+  .post(async (req,res)=>{
+   // const query = {userId:req.body.id}
+    const result = await orderList.find().toArray();
+    res.send(result);
+  })
+             
+         
+ customerRouter.route('/getSingleOrder')
+ .post(async(req,res)=>{
+    const id = new ObjectId(req.body.id);
+    const result = await orderList.find({ _id: id}).toArray();
+    res.send(result);
+ })
+  
         customerRouter.route('/users')
             .post(async (req, res) => {
                 const user = req.body;

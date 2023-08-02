@@ -9,6 +9,19 @@ async function run() {
         await client.connect();
         const usersCollection = client.db('threadZone').collection('users')
 
+
+      const shop = client.db('threadZone').collection('shops');
+
+      sellerRouter.route("/addShop")
+      .post(async(req,res)=>{
+        //const data = req.body;
+        await shop.insertOne(data);
+        console.log("add review ",data);
+        res.send({status:true});
+      })
+             
+         
+
         sellerRouter.route('/users/seller/:id')
             .patch(async (req, res) => {
                 const id = req.params.id;
@@ -30,6 +43,7 @@ async function run() {
                 const result = { seller: user?.role === 'seller' }
                 res.send(result);
             })
+
 
 
 
