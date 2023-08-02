@@ -9,6 +9,7 @@ async function run() {
 
 
         const usersCollection = client.db('threadZone').collection('users')
+        const galleryCollection = client.db('threadZone').collection('gallery')
 
         // customerRouter.route("/instructor")
         // .get(async (req, res) => {
@@ -30,6 +31,11 @@ async function run() {
         customerRouter.route('/users')
             .get(async (req, res) => {
                 const result = await usersCollection.find().toArray()
+                res.send(result)
+            })
+        customerRouter.route('/gallery')
+            .get(async (req, res) => {
+                const result = await galleryCollection.find().toArray()
                 res.send(result)
             })
 
