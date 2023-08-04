@@ -8,6 +8,7 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const usersCollection = client.db('threadZone').collection('users')
+        const shop = client.db('threadZone').collection('shops');
 
         adminRouter.route('/users/admin/:id')
             .patch(async (req, res) => {
@@ -32,6 +33,27 @@ async function run() {
             })
 
 
+        adminRouter.route('/shopStatus')
+            .get(async (req, res) => {
+                const result = await shop.find().toArray()
+                res.send(result)
+            })
+
+
+
+        adminRouter.route('/updateStatus/:id').put(async (req, res) => {
+
+            const { id } = req.params;
+            const { status, reason } = req.body;
+            const updatedShop = await shop.findOneAndUpdate(
+                { _id: new ObjectId(id) },
+                { $set: { status, reason } },
+                { returnOriginal: false }
+            );
+            res.send(updatedShop)
+
+
+        });
 
 
 
