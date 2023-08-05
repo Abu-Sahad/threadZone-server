@@ -11,25 +11,27 @@ async function run() {
         const orderList = client.db('threadZone').collection('orders');
            const usersCollection = client.db('threadZone').collection('users')
         const galleryCollection = client.db('threadZone').collection('gallery')
-        
 
 
-  // ryd start 
+
+  // ryd start
   customerRouter.route('/getAllProduct')
   .post(async (req,res)=>{
    // const query = {userId:req.body.id}
     const result = await orderList.find().toArray();
     res.send(result);
   })
-             
-         
+
+
  customerRouter.route('/getSingleOrder')
  .post(async(req,res)=>{
     const id = new ObjectId(req.body.id);
     const result = await orderList.find({ _id: id}).toArray();
     res.send(result);
  })
-  
+
+ //sahad
+
         customerRouter.route('/users')
             .post(async (req, res) => {
                 const user = req.body;
@@ -53,6 +55,15 @@ async function run() {
                 res.send(result)
             })
 
+// ryd
+
+customerRouter.route('/findUserImformation')
+.post(async(req,res)=>{
+   const email = req.body.email;
+   const userId = await usersCollection.findOne({email});
+  // console.log("user id", userId);
+   res.send(userId)
+})
 
 
 
@@ -63,6 +74,6 @@ async function run() {
         // Ensures that the client will close when you finish/error
         //await client.close();
     }
-}
+}   
 run().catch(console.dir);
 module.exports = customerRouter;

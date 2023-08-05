@@ -7,8 +7,11 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+
+        const categoryList = client.db('threadZone').collection('categorys')
         const usersCollection = client.db('threadZone').collection('users')
         const shop = client.db('threadZone').collection('shops');
+
 
         adminRouter.route('/users/admin/:id')
             .patch(async (req, res) => {
@@ -32,6 +35,19 @@ async function run() {
                 res.send(result);
             })
 
+  //ryd
+          adminRouter.route('/addCategory')
+          .post(async(req,res)=>{
+            try {
+              const category = req.body;
+            //  console.log(category);
+               await categoryList.insertOne(category);
+               res.send({status:true});
+            } catch (e) {
+              console.log(e);;
+              res.send({status:false})
+            }
+         })
 
         adminRouter.route('/shopStatus')
             .get(async (req, res) => {
@@ -55,6 +71,20 @@ async function run() {
 
         });
 
+   //ryd
+    adminRouter.route('/getAllCategory')
+    .get(async(req,res)=>{
+      const result = await categoryList.find().toArray();
+      res.send(result)
+    })
+
+    //ryd
+    adminRouter.route('/deleteCategory')
+    .post(async(req,res)=>{
+      const id = new ObjectId( req.body.id);
+      const result = categoryList.deleteOne({_id : id});
+      res.send({status:true});
+    })
 
 
 
