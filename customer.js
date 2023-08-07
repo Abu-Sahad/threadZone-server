@@ -9,8 +9,11 @@ async function run() {
         await client.connect();
 
         const orderList = client.db('threadZone').collection('orders');
-           const usersCollection = client.db('threadZone').collection('users')
+        const usersCollection = client.db('threadZone').collection('users')
         const galleryCollection = client.db('threadZone').collection('gallery')
+        const product = client.db('threadZone').collection('products');
+        const cartList = client.db('threadZone').collection('cartList');
+        const address = client.db('threadZone').collection('addreses');
 
 
 
@@ -65,6 +68,48 @@ customerRouter.route('/findUserImformation')
    res.send(userId)
 })
 
+  //ryd
+   customerRouter.route('/orderSubmit')
+   .post(async(req,res)=>{
+     const data = req.body;
+     cartList.insertOne(data);
+     res.send({status:true})
+
+   })
+
+    //ryd
+    customerRouter.route('/getCartList')
+    .post(async(req,res)=>{
+      const data = req.body.id;
+      const id = new ObjectId(data);
+      const result = await cartList.find({userId:data}).toArray();
+      res.send(result);
+    })
+
+    //ryd
+    customerRouter.route('/deleteCartItem')
+    .post(async(req,res)=>{
+      try {
+        const id = new ObjectId(req.body.id);
+        await cartList.deleteOne({_id:id});
+        res.send({status:true});
+      } catch (e) {
+        console.log(e);
+        res.send({status:false});
+      }
+    })
+
+      //ryd
+      customerRouter.route('/addAddress')
+      .post(async(req,res)=>{
+        try {
+          await  address.insertOne(req.body);
+          res.send({status:true})
+        } catch (e) {
+          console.log(e);
+        }
+
+      })
 
 
         // Send a ping to confirm a successful connection
@@ -74,6 +119,6 @@ customerRouter.route('/findUserImformation')
         // Ensures that the client will close when you finish/error
         //await client.close();
     }
-}   
+}
 run().catch(console.dir);
 module.exports = customerRouter;

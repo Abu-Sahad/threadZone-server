@@ -7,11 +7,10 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
-
-        const categoryList = client.db('threadZone').collection('categorys')
-        const usersCollection = client.db('threadZone').collection('users')
-        const shop = client.db('threadZone').collection('shops');
-
+        const usersCollection = client.db('threadZone').collection('users');
+        const categoryList = client.db('threadZone').collection('categorys');
+        const products = client.db('threadZone').collection('products');
+        const pendingProduct = client.db('threadZone').collection('pendingProducts');
 
         adminRouter.route('/users/admin/:id')
             .patch(async (req, res) => {
@@ -44,32 +43,11 @@ async function run() {
                await categoryList.insertOne(category);
                res.send({status:true});
             } catch (e) {
-              console.log(e);;
+              console.log(e);
               res.send({status:false})
             }
          })
 
-        adminRouter.route('/shopStatus')
-            .get(async (req, res) => {
-                const result = await shop.find().toArray()
-                res.send(result)
-            })
-
-
-
-        adminRouter.route('/updateStatus/:id').put(async (req, res) => {
-
-            const { id } = req.params;
-            const { status, reason } = req.body;
-            const updatedShop = await shop.findOneAndUpdate(
-                { _id: new ObjectId(id) },
-                { $set: { status, reason } },
-                { returnOriginal: false }
-            );
-            res.send(updatedShop)
-
-
-        });
 
    //ryd
     adminRouter.route('/getAllCategory')
@@ -82,10 +60,33 @@ async function run() {
     adminRouter.route('/deleteCategory')
     .post(async(req,res)=>{
       const id = new ObjectId( req.body.id);
-      const result = categoryList.deleteOne({_id : id});
+      const result = await categoryList.deleteOne({_id : id});
       res.send({status:true});
     })
 
+    //ryd
+    adminRouter.route('/getApproveProduct')
+    .get(async(req,res)=>{
+      const result = await pendingProduct.find({status:'pending'}).toArray();
+      console.log('check for products ');
+      res.send(result);
+    })
+ //ryd
+
+   adminRouter.route('/adminProductApprove')
+   .post(async(req,res)=>{
+     const data = req.body;
+      const id = new ObjectId(data._id);
+     if(data.status==='approve'){
+       await products.insertOne(data);
+       await pendingProduct.deleteOne({_id:id})
+     }else if(data.status==='denied'){
+
+       await pendingProduct.updateOne({_id:id},{$set:{status:data.status}});
+     }
+     console.log("approve data ",data );
+     res.send({status:true})
+   })
 
 
         // Send a ping to confirm a successful connection
