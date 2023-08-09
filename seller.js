@@ -4,13 +4,15 @@ const express = require('express');
 const sellerRouter = express.Router();
 
 async function run() {
-    try {   
+    try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const usersCollection = client.db('threadZone').collection('users')
 
 
       const shop = client.db('threadZone').collection('shops');
+      const product = client.db('threadZone').collection('products');
+      const pendingProduct = client.db('threadZone').collection('pendingProducts');
 
       sellerRouter.route("/addShop")
       .post(async(req,res)=>{
@@ -20,8 +22,8 @@ async function run() {
         res.send({status:true});
       })
 
-             
-         
+
+
 
         sellerRouter.route('/users/seller/:id')
             .patch(async (req, res) => {
@@ -45,7 +47,16 @@ async function run() {
                 res.send(result);
             })
 
+  //ryd
 
+     sellerRouter.route('/addProduct')
+     .post(async(req,res)=>{
+       const data = req.body;
+      // console.log('product data', data);
+       const result = pendingProduct.insertOne(data);
+
+       res.send({status:true})
+     })
 
 
 
