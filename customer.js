@@ -53,6 +53,11 @@ async function run() {
                 const result = await galleryCollection.find().toArray()
                 res.send(result)
             })
+        customerRouter.route('/products')
+            .get(async (req, res) => {
+                const result = await product.find().toArray()
+                res.send(result)
+            })
 
         customerRouter.route('/findUserImformation')
             .post(async (req, res) => {
@@ -62,48 +67,47 @@ async function run() {
                 res.send(userId)
             })
 
-  //ryd
-   customerRouter.route('/orderSubmit')
-   .post(async(req,res)=>{
-     const data = req.body;
-     cartList.insertOne(data);
-     res.send({status:true})
+        //ryd
+        customerRouter.route('/orderSubmit')
+            .post(async (req, res) => {
+                const data = req.body;
+                cartList.insertOne(data);
+                res.send({ status: true })
 
-   })
+            })
 
-    //ryd
-    customerRouter.route('/getCartList')
-    .post(async(req,res)=>{
-      const data = req.body.id;
-      const id = new ObjectId(data);
-      const result = await cartList.find({userId:data}).toArray();
-      res.send(result);
-    })
+        //ryd
+        customerRouter.route('/getCartList')
+            .post(async (req, res) => {
+                const data = req.body.id;
+                const id = new ObjectId(data);
+                const result = await cartList.find({ userId: data }).toArray();
+                res.send(result);
+            })
 
-    //ryd
-    customerRouter.route('/deleteCartItem')
-    .post(async(req,res)=>{
-      try {
-        const id = new ObjectId(req.body.id);
-        await cartList.deleteOne({_id:id});
-        res.send({status:true});
-      } catch (e) {
-        console.log(e);
-        res.send({status:false});
-      }
-    })
+        //ryd
+        customerRouter.route('/deleteCartItem')
+            .post(async (req, res) => {
+                try {
+                    const id = new ObjectId(req.body.id);
+                    await cartList.deleteOne({ _id: id });
+                    res.send({ status: true });
+                } catch (e) {
+                    console.log(e);
+                    res.send({ status: false });
+                }
+            })
 
-      //ryd
-      customerRouter.route('/addAddress')
-      .post(async(req,res)=>{
-        try {
-          await  address.insertOne(req.body);
-          res.send({status:true})
-        } catch (e) {
-          console.log(e);
-        }
-
-      })
+        //ryd
+        customerRouter.route('/addAddress')
+            .post(async (req, res) => {
+                try {
+                    await address.insertOne(req.body);
+                    res.send({ status: true })
+                } catch (e) {
+                    console.log(e);
+                }
+ })
 
       //ryd
       customerRouter.route('/getAddress')
@@ -190,8 +194,7 @@ async function run() {
           console.log(e);
         }
       })
-
-
+       
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
