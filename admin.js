@@ -4,16 +4,17 @@ const express = require('express');
 const adminRouter = express.Router();
 
 async function run() {
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        const usersCollection = client.db('threadZone').collection('users');
-        const categoryList = client.db('threadZone').collection('categorys');
-        const products = client.db('threadZone').collection('products');
-        const pendingProduct = client.db('threadZone').collection('pendingProducts');
-        const orders = client.db('threadZone').collection('orders');
+  try {
+    // Connect the client to the server	(optional starting in v4.7)
+    await client.connect();
+    const usersCollection = client.db('threadZone').collection('users');
+    const categoryList = client.db('threadZone').collection('categorys');
+    const products = client.db('threadZone').collection('products');
+    const pendingProduct = client.db('threadZone').collection('pendingProducts');
+    const orders = client.db('threadZone').collection('orders');
+    const shop = client.db('threadZone').collection('shops');
 
- 
+
     adminRouter.route('/users/admin/:id')
       .patch(async (req, res) => {
         const id = req.params.id;
@@ -36,6 +37,23 @@ async function run() {
         res.send(result);
       })
 
+    adminRouter.route('/updateStatus/:id')
+      .put(async (req, res) => {
+        const { id } = req.params;
+        const { status, reason } = req.body;
+        const updatedShop = await shop.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $set: { status, reason } },
+          { returnOriginal: false }
+        );
+        res.send(updatedShop)
+      })
+
+    adminRouter.route('/shopStatus')
+      .get(async (req, res) => {
+        const pendingShops = await shop.find({ status: 'pending' }).toArray();
+        res.send(pendingShops)
+      })
 
 
     adminRouter.route('/products/:id')
@@ -103,27 +121,27 @@ async function run() {
         res.send({ status: true })
       })
 
-   adminRouter.route('/adminDeliveryList')
-   .get(async(req,res)=>{
-     const result = await orders.find({status:'warehouse'}).toArray();
-     res.send(result);
-   })
+    adminRouter.route('/adminDeliveryList')
+      .get(async (req, res) => {
+        const result = await orders.find({ status: 'warehouse' }).toArray();
+        res.send(result);
+      })
 
-   adminRouter.route('/singleProductDelivery')
-   .post(async(req,res)=>{
-     try {
-       const id = new ObjectId(req.body.id);
-       const result = await orders.updateOne({_id:id},{$set:{status:'delivered'}});
-       res.send({status:true});
-     } catch (e) {
-       res.send({status:false});
-     }
-   })
-   adminRouter.route('/adminDeliverycomplete')
-   .get(async(req,res)=>{
-     const result = await orders.find({status:'delivered'}).toArray();
-     res.send(result);
-   })
+    adminRouter.route('/singleProductDelivery')
+      .post(async (req, res) => {
+        try {
+          const id = new ObjectId(req.body.id);
+          const result = await orders.updateOne({ _id: id }, { $set: { status: 'delivered' } });
+          res.send({ status: true });
+        } catch (e) {
+          res.send({ status: false });
+        }
+      })
+    adminRouter.route('/adminDeliverycomplete')
+      .get(async (req, res) => {
+        const result = await orders.find({ status: 'delivered' }).toArray();
+        res.send(result);
+      })
 
 
     // Send a ping to confirm a successful connection
