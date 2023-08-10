@@ -4,14 +4,16 @@ const express = require('express');
 const adminRouter = express.Router();
 
 async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    const usersCollection = client.db('threadZone').collection('users');
-    const categoryList = client.db('threadZone').collection('categorys');
-    const products = client.db('threadZone').collection('products');
-    const pendingProduct = client.db('threadZone').collection('pendingProducts');
+    try {
+        // Connect the client to the server	(optional starting in v4.7)
+        await client.connect();
+        const usersCollection = client.db('threadZone').collection('users');
+        const categoryList = client.db('threadZone').collection('categorys');
+        const products = client.db('threadZone').collection('products');
+        const pendingProduct = client.db('threadZone').collection('pendingProducts');
+        const orders = client.db('threadZone').collection('orders');
 
+ 
     adminRouter.route('/users/admin/:id')
       .patch(async (req, res) => {
         const id = req.params.id;
@@ -100,6 +102,28 @@ async function run() {
         console.log("approve data ", data);
         res.send({ status: true })
       })
+
+   adminRouter.route('/adminDeliveryList')
+   .get(async(req,res)=>{
+     const result = await orders.find({status:'warehouse'}).toArray();
+     res.send(result);
+   })
+
+   adminRouter.route('/singleProductDelivery')
+   .post(async(req,res)=>{
+     try {
+       const id = new ObjectId(req.body.id);
+       const result = await orders.updateOne({_id:id},{$set:{status:'delivered'}});
+       res.send({status:true});
+     } catch (e) {
+       res.send({status:false});
+     }
+   })
+   adminRouter.route('/adminDeliverycomplete')
+   .get(async(req,res)=>{
+     const result = await orders.find({status:'delivered'}).toArray();
+     res.send(result);
+   })
 
 
     // Send a ping to confirm a successful connection
