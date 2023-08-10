@@ -14,6 +14,7 @@ async function run() {
         const product = client.db('threadZone').collection('products');
         const cartList = client.db('threadZone').collection('cartList');
         const address = client.db('threadZone').collection('addreses');
+        const review = client.db('threadZone').collection('reviews');
 
         // ryd start
         customerRouter.route('/getAllProduct')
@@ -103,6 +104,93 @@ async function run() {
         }
 
       })
+
+      //ryd
+      customerRouter.route('/getAddress')
+      .post(async(req,res)=> {
+        const id = req.body.id;
+        const data = await address.find({userId:id}).toArray();
+        res.send(data);
+      })
+      //ryd
+
+      customerRouter.route('/submitOrder')
+      .post(async(req,res)=>{
+        const data = req.body;
+      //  console.log("order List ",data);
+       for(var i=0;i<data.length;i++){
+         const id = new ObjectId(data[i].productId)
+         const singleProduct = await product.findOne({_id:id});
+         const presentQuantity = singleProduct.quantity;
+         const afterSelling = singleProduct.quantity - data[i].quantity;
+         await product.updateOne({_id:id},{$set:{quantity:afterSelling}});
+         const singleProduct2 = await product.findOne({_id:id});
+       }
+
+        orderList.insertMany(data);
+        res.send({success:true});
+      })
+
+      //ryd 10-august-23
+      customerRouter.route('/addReview')
+      .post(async(req,res)=>{
+        try {
+          const data = req.body;
+          const id = new ObjectId(req.body.orderId);
+          await orderList.updateOne({_id:id},{$set:{status:data.status}});
+          await review.insertOne(data);
+          res.send({status:true})
+        } catch (e) {
+          console.log(e);
+        }
+      })
+
+      customerRouter.route('/getReturnList')
+      .post(async(req,res)=>{
+        try {
+          const role = req.body.role;
+          if(role==='customer'){
+            const userId = req.body.userId;
+            const result = await orderList.find({$and:[{userId:userId},{status:'returned'}]}).toArray();
+          //  console.log('Return List ',result);
+            res.send(result)
+          }else if(role==='seller'){
+            const shopId = req.body.shopId;
+            const result = await orderList.find({status:'returned'}).toArray();
+            res.send(result);
+          }else if(role==='admin'){
+            const result = await orderList.find({status:'returned'}).toArray();
+            res.send(result);
+          }
+
+        } catch (e) {
+          console.log(e);
+        }
+      })
+
+      customerRouter.route('/getReviewList')
+      .post(async(req,res)=>{
+        try {
+          const role = req.body.role;
+          if(role==='customer'){
+            const userId = req.body.userId;
+            const result = await orderList.find({$and:[{userId:userId},{status:'reviewed'}]}).toArray();
+          //  console.log('Review List ',result);
+            res.send(result)
+          } else if(role==='seller'){
+            const shopId = req.body.shopId;
+            const result = await orderList.find({status:'reviewed'}).toArray();
+            res.send(result);
+          }else if(role==='admin'){
+            const result = await orderList.find({status:'reviewed'}).toArray();
+            res.send(result);
+          }
+
+        } catch (e) {
+          console.log(e);
+        }
+      })
+
 
 
         // Send a ping to confirm a successful connection

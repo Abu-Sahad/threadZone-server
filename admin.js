@@ -11,6 +11,7 @@ async function run() {
         const categoryList = client.db('threadZone').collection('categorys');
         const products = client.db('threadZone').collection('products');
         const pendingProduct = client.db('threadZone').collection('pendingProducts');
+        const orders = client.db('threadZone').collection('orders');
 
         adminRouter.route('/users/admin/:id')
             .patch(async (req, res) => {
@@ -86,6 +87,28 @@ async function run() {
      }
      console.log("approve data ",data );
      res.send({status:true})
+   })
+
+   adminRouter.route('/adminDeliveryList')
+   .get(async(req,res)=>{
+     const result = await orders.find({status:'warehouse'}).toArray();
+     res.send(result);
+   })
+
+   adminRouter.route('/singleProductDelivery')
+   .post(async(req,res)=>{
+     try {
+       const id = new ObjectId(req.body.id);
+       const result = await orders.updateOne({_id:id},{$set:{status:'delivered'}});
+       res.send({status:true});
+     } catch (e) {
+       res.send({status:false});
+     }
+   })
+   adminRouter.route('/adminDeliverycomplete')
+   .get(async(req,res)=>{
+     const result = await orders.find({status:'delivered'}).toArray();
+     res.send(result);
    })
 
 
