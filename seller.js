@@ -93,9 +93,7 @@ async function run() {
         sellerRouter.route('/product/:productId')
             .put(async (req, res) => {
                 const productId = req.params.productId;
-                console.log(productId);
                 const updatedProductData = req.body;
-                console.log(updatedProductData)
                 const result = await product.updateOne(
                     { _id: new ObjectId(productId) },
                     { $set: updatedProductData }
