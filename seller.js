@@ -17,7 +17,7 @@ async function run() {
 
       sellerRouter.route("/addShop")
       .post(async(req,res)=>{
-        //const data = req.body;
+        const data = req.body;
         await shop.insertOne(data);
         console.log("add review ",data);
         res.send({status:true});
