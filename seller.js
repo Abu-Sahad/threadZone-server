@@ -10,18 +10,18 @@ async function run() {
         const usersCollection = client.db('threadZone').collection('users')
 
 
-      const shop = client.db('threadZone').collection('shops');
-      const product = client.db('threadZone').collection('products');
-      const pendingProduct = client.db('threadZone').collection('pendingProducts');
-      const orders = client.db('threadZone').collection('orders');
+        const shop = client.db('threadZone').collection('shops');
+        const product = client.db('threadZone').collection('products');
+        const pendingProduct = client.db('threadZone').collection('pendingProducts');
+        const orders = client.db('threadZone').collection('orders');
 
-      sellerRouter.route("/addShop")
-      .post(async(req,res)=>{
-        //const data = req.body;
-        await shop.insertOne(data);
-        console.log("add review ",data);
-        res.send({status:true});
-      })
+        sellerRouter.route("/addShop")
+            .post(async (req, res) => {
+                //const data = req.body;
+                await shop.insertOne(data);
+                console.log("add review ", data);
+                res.send({ status: true });
+            })
 
 
 
@@ -48,47 +48,47 @@ async function run() {
                 res.send(result);
             })
 
-  //ryd
+        //ryd
 
-     sellerRouter.route('/addProduct')
-     .post(async(req,res)=>{
-       const data = req.body;
-      // console.log('product data', data);
-       const result = pendingProduct.insertOne(data);
+        sellerRouter.route('/addProduct')
+            .post(async (req, res) => {
+                const data = req.body;
+                // console.log('product data', data);
+                const result = pendingProduct.insertOne(data);
 
-       res.send({status:true})
-     })
+                res.send({ status: true })
+            })
 
-     //ryd
-     sellerRouter.route('/sellerOrderRequest')
-     .post(async(req,res)=>{
-       const shopId = req.body.shopId;
-      // const result = await orders.find({$and:[{shopId:shopId},{$or:[{status:'approved'},{status:'warehouse'}]}]}).toArray();
-       const result = await orders.find({$or:[{status:'approved'},{status:'warehouse'}]}).toArray();
+        //ryd
+        sellerRouter.route('/sellerOrderRequest')
+            .post(async (req, res) => {
+                const shopId = req.body.shopId;
+                // const result = await orders.find({$and:[{shopId:shopId},{$or:[{status:'approved'},{status:'warehouse'}]}]}).toArray();
+                const result = await orders.find({ $or: [{ status: 'approved' }, { status: 'warehouse' }] }).toArray();
 
-    //   console.log("orders data ",result);
-       res.send(result);
+                //   console.log("orders data ",result);
+                res.send(result);
 
-     })
+            })
 
-     sellerRouter.route('/sentToWarehouse')
-     .post(async(req,res)=>{
-       const id = new ObjectId(req.body.id);
-       await orders.updateOne({_id:id},{$set:{status:'warehouse'}});
-       res.send({status:true})
-     })
+        sellerRouter.route('/sentToWarehouse')
+            .post(async (req, res) => {
+                const id = new ObjectId(req.body.id);
+                await orders.updateOne({ _id: id }, { $set: { status: 'warehouse' } });
+                res.send({ status: true })
+            })
 
-     sellerRouter.route('/sellerOrderComplete')
-     .post(async(req,res)=>{
-       try{
-         const shopId = req.body.shopId;
-         const result = await orders.find({shopId:shopId,status:'delivered'}).toArray();
-         res.send(result);
-       }
-       catch(err){
-         console.log(err);
-       }
-     })
+        sellerRouter.route('/sellerOrderComplete')
+            .post(async (req, res) => {
+                try {
+                    const shopId = req.body.shopId;
+                    const result = await orders.find({ shopId: shopId, status: 'delivered' }).toArray();
+                    res.send(result);
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            })
 
 
 
