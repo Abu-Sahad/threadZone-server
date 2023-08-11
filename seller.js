@@ -23,9 +23,6 @@ async function run() {
                 res.send({ status: true });
             })
 
-
-
-
         sellerRouter.route('/users/seller/:id')
             .patch(async (req, res) => {
                 const id = req.params.id;
@@ -90,6 +87,34 @@ async function run() {
                 }
             })
 
+
+
+
+        sellerRouter.route('/product/:productId')
+            .put(async (req, res) => {
+                const productId = req.params.productId;
+                console.log(productId);
+                const updatedProductData = req.body;
+                console.log(updatedProductData)
+                const result = await product.updateOne(
+                    { _id: new ObjectId(productId) },
+                    { $set: updatedProductData }
+                );
+
+                res.send(result)
+            });
+
+
+
+
+        sellerRouter.route('/products/:productId')
+            .get(async (req, res) => {
+                const productId = req.params.productId;
+                const productItem = await product.findOne({ _id: new ObjectId(productId) });
+                // Send the product data
+                res.send(productItem);
+
+            })
 
 
 
