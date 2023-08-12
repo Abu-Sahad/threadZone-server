@@ -13,6 +13,7 @@ async function run() {
     const pendingProduct = client.db('threadZone').collection('pendingProducts');
     const orders = client.db('threadZone').collection('orders');
     const shop = client.db('threadZone').collection('shops');
+    const notification = client.db('threadZone').collection('notifications');
 
 
     adminRouter.route('/users/admin/:id')
@@ -40,14 +41,24 @@ async function run() {
     adminRouter.route('/updateStatus/:id')
       .put(async (req, res) => {
         const { id } = req.params;
-        const { status, reason } = req.body;
+        const { status, reason,userId } = req.body;
+        const uid = new ObjectId(userId)
+      //  console.log("shop conformation update status ",id,status,reason);
         const updatedShop = await shop.findOneAndUpdate(
           { _id: new ObjectId(id) },
           { $set: { status, reason } },
           { returnOriginal: false }
         );
+        const shopName = updatedShop.value.shopName;
+        console.log("update shop ",shopName);
+
+        if(status==='approve'){
+           const updateUser = await usersCollection.updateOne({_id:uid},{$set:{role:'seller',shopId:id,shopName:shopName}});
+        }
         res.send(updatedShop)
       })
+
+
 
     adminRouter.route('/shopStatus')
       .get(async (req, res) => {
@@ -72,7 +83,7 @@ async function run() {
       .post(async (req, res) => {
         try {
           const category = req.body;
-          //  console.log(category);
+            console.log(category);
           await categoryList.insertOne(category);
           res.send({ status: true });
         } catch (e) {
@@ -101,7 +112,7 @@ async function run() {
     adminRouter.route('/getApproveProduct')
       .get(async (req, res) => {
         const result = await pendingProduct.find({ status: 'pending' }).toArray();
-        console.log('check for products ');
+
         res.send(result);
       })
     //ryd
@@ -110,14 +121,24 @@ async function run() {
       .post(async (req, res) => {
         const data = req.body;
         const id = new ObjectId(data._id);
+
+        const notif = {
+          role:'seller',
+          isRead:false,
+          shopId:data.shopId,
+          shopName:data.shopName,
+          description:`Admin accept your ${data.productName} product. Now you can sell `
+        }
+
         if (data.status === 'approve') {
           await products.insertOne(data);
-          await pendingProduct.deleteOne({ _id: id })
+          await pendingProduct.deleteOne({ _id: id });
+          await notification.insertOne(notif);
         } else if (data.status === 'denied') {
-
+          const newNotif = {...notif,description:`Admin reject your ${data.productName} product!!`};
           await pendingProduct.updateOne({ _id: id }, { $set: { status: data.status } });
+          await notification.insertOne(newNotif);
         }
-        console.log("approve data ", data);
         res.send({ status: true })
       })
 
@@ -133,15 +154,53 @@ async function run() {
           const id = new ObjectId(req.body.id);
           const result = await orders.updateOne({ _id: id }, { $set: { status: 'delivered' } });
           res.send({ status: true });
+
+          //notification
+          const data = await orders.findOne({_id:id})
+
+          const notif = {
+            role:'customer',
+            isRead:false,
+            shopId:data.shopId,
+            userId:data.userId,
+            description:`your ordered ${data.productName} product from ${data.shopName} shop is delivered. Hope you Like it!`
+          }
+            await notification.insertOne(notif);
+            const notif2 = {
+              role:'seller',
+              isRead:false,
+              shopId:data.shopId,
+              userId:data.userId,
+              description:`${data.productName} for ${data.userName} is delivered`
+            }
+              await notification.insertOne(notif2);
+
         } catch (e) {
           res.send({ status: false });
         }
       })
+
+
     adminRouter.route('/adminDeliverycomplete')
       .get(async (req, res) => {
         const result = await orders.find({ status: 'delivered' }).toArray();
         res.send(result);
       })
+
+      adminRouter.route('/updateNotification')
+      .post(async(req,res)=>{
+        const id = new ObjectId(req.body.id);
+        await notification.updateOne({_id:id},{$set:{isRead:true}});
+        res.send({status:true})
+      })
+
+      adminRouter.route('/deleteNotification')
+      .post(async(req,res)=>{
+        const id = new ObjectId(req.body.id);
+        await notification.deleteOne({_id:id});
+        res.send({status:true})
+      })
+
 
 
     // Send a ping to confirm a successful connection
