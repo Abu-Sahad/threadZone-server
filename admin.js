@@ -14,6 +14,7 @@ async function run() {
     const orders = client.db('threadZone').collection('orders');
     const shop = client.db('threadZone').collection('shops');
     const notification = client.db('threadZone').collection('notifications');
+    const voucher = client.db('threadZone').collection('vouchers');
 
 
     adminRouter.route('/users/admin/:id')
@@ -199,6 +200,40 @@ async function run() {
         const id = new ObjectId(req.body.id);
         await notification.deleteOne({_id:id});
         res.send({status:true})
+      })
+
+      //ryd-13-8-23
+      adminRouter.route('/addVoucher')
+      .post(async(req,res)=>{
+        const data = req.body;
+        await voucher.insertOne(data);
+        res.send({status:true})
+
+      })
+
+      adminRouter.route('/deleteVoucher')
+      .post(async(req,res)=>{
+        const id = new ObjectId(req.body.id);
+        await voucher.deleteOne({_id:id});
+        res.send({status:true});
+      })
+
+      adminRouter.route('/getAllVoucher')
+      .get(async(req,res)=>{
+        const result =await voucher.find().toArray();
+        res.send(result);
+      })
+      adminRouter.route('/useVoucher')
+      .post(async(req,res)=>{
+        const data = req.body;
+        const result = await voucher.find({voucherName:data}).toArray();
+        if(result.length>0 && result.quantity>0){
+          const newQuantity = result.quantity-1;
+          await voucher.updateOne({voucherName:data},{$set:{quantity:newQuantity}});
+          res.send({status:true});
+        } else {
+          res.send({status:false});
+        }
       })
 
 

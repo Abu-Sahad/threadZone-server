@@ -72,8 +72,14 @@ async function run() {
         customerRouter.route('/orderSubmit')
             .post(async (req, res) => {
                 const data = req.body;
-                await cartList.insertOne(data);
-                res.send({ status: true });
+                const length = await cartList.find({$and:[{userId:data.userId},{productId:data.productId}]}).toArray();
+                if(length.length===0){
+                  await cartList.insertOne(data);
+                  res.send({ status: true });
+                }else {
+                  res.send({status:false});
+                }
+
 
             })
 
@@ -232,6 +238,14 @@ async function run() {
                     } else if (role === 'admin') {
                         const result = await review.find({ status: 'reviewed' }).toArray();
                         res.send(result);
+                    }else if(role==='product'){
+                      const productId = req.body.productId;
+                    //  const result = await await review.find({$and:[{ status: 'reviewed' },{productId}]}).toArray();
+                   const result = await review
+                   .find({ status: 'reviewed' })
+                   .project({userName:true,userImage:true,description:true,image:true,rating:true})
+                   .toArray();
+                      res.send(result);
                     }
 
                 } catch (e) {
@@ -266,6 +280,19 @@ async function run() {
              }
              res.send(result);
             })
+
+            //ryd 15-8-23
+            customerRouter.route('/getSingleProduct')
+            .post(async(req,res)=>{
+              const id = new ObjectId(req.body.productId);
+             const result = await product.find({_id:id}).toArray();
+              //console.log(result);
+              res.send(result);
+            })
+
+
+           customerRouter.route('/getAllReview')
+           .post()
 
 
         // Send a ping to confirm a successful connection
