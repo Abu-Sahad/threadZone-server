@@ -41,8 +41,6 @@ async function run() {
       res.send(result);
      })
 
-
-
      dashboardRouter.route('/sellsVsPrice')
      .post(async(req,res)=>{
        const role = req.body.role;
