@@ -5,7 +5,6 @@ const sellerRouter = express.Router();
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const usersCollection = client.db('threadZone').collection('users')
 
@@ -15,7 +14,6 @@ async function run() {
         const pendingProduct = client.db('threadZone').collection('pendingProducts');
         const orders = client.db('threadZone').collection('orders');
         const notification = client.db('threadZone').collection('notifications');
-
 
         sellerRouter.route("/addShop")
             .post(async (req, res) => {
@@ -114,9 +112,6 @@ async function run() {
                 }
             })
 
-
-
-
         sellerRouter.route('/product/:productId')
             .put(async (req, res) => {
                 const productId = req.params.productId;
@@ -129,9 +124,6 @@ async function run() {
                 res.send(result)
             });
 
-
-
-
         sellerRouter.route('/products/:productId')
             .get(async (req, res) => {
                 const productId = req.params.productId;
@@ -140,9 +132,6 @@ async function run() {
                 res.send(productItem);
 
             })
-
-
-
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
