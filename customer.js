@@ -16,6 +16,20 @@ async function run() {
         const address = client.db('threadZone').collection('addreses');
         const review = client.db('threadZone').collection('reviews');
 
+
+        customerRouter.route('/recomended')
+        .get(async (req, res) => {
+            const result = await product.find().sort({ rating: -1 }).limit(6).toArray();
+            res.send(result)
+        })
+        customerRouter.route('/newArrival')
+        .get(async (req, res) => {
+            const result = await product.find().sort({ updateDate: -1 }).limit(4).toArray();
+            res.send(result)
+        })
+
+
+
         // ryd start
         customerRouter.route('/getAllProduct')
             .post(async (req, res) => {
