@@ -8,6 +8,7 @@ const adminRouter = require('./admin');
 const sellerRouter = require('./seller');
 const customerRouter = require('./customer');
 const productRouter = require('./product');
+const dashboardRouter = require('./dashboard');
 
 app.use(cors())
 app.use(express.json())
@@ -16,6 +17,7 @@ app.use(express.json())
   app.use('/',sellerRouter);
   app.use('/',customerRouter);
   app.use('/',productRouter);
+  app.use('/',dashboardRouter);
 
 
 
