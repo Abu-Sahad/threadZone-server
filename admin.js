@@ -6,7 +6,7 @@ const adminRouter = express.Router();
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+     client.connect();
     const usersCollection = client.db('threadZone').collection('users');
     const categoryList = client.db('threadZone').collection('categorys');
     const products = client.db('threadZone').collection('products');
