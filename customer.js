@@ -16,6 +16,7 @@ async function run() {
         const address = client.db('threadZone').collection('addreses');
         const review = client.db('threadZone').collection('reviews');
         const notification = client.db('threadZone').collection('notifications');
+        const shop = client.db('threadZone').collection('shops');
 
 
         customerRouter.route('/recomended')
@@ -146,8 +147,9 @@ async function run() {
                 //  console.log("order List ",data);
                 for (var i = 0; i < data.length; i++) {
                     const id = new ObjectId(data[i].productId)
-                    const singleProduct = await product.findOne({ _id: id });
-                    const presentQuantity = singleProduct.quantity;
+                    const singleProduct = await product.find({ _id: id }).toArray();
+                    console.log("single product ",singleProduct);
+                    const presentQuantity = parseInt(singleProduct.quantity);
                     const afterSelling = singleProduct.quantity - data[i].quantity;
                     await product.updateOne({ _id: id }, { $set: { quantity: afterSelling } });
                     const singleProduct2 = await product.findOne({ _id: id });
@@ -300,14 +302,22 @@ async function run() {
             .post(async(req,res)=>{
               const id = new ObjectId(req.body.productId);
              const result = await product.find({_id:id}).toArray();
-              //console.log(result);
+              // console.log('get single product ',id,result);
               res.send(result);
             })
 
 
-           customerRouter.route('/getAllReview')
-           .post()
+           customerRouter.route('/getAllShop')
+           .get(async(req,res)=>{
+             const result = await shop.find().toArray();
+             res.send(result);
+           })
 
+           customerRouter.route('/getPreviousOrder')
+           .post(async(req,res)=>{
+             const result = await orderList.find({$and:[{userId:req.body.userId},{status:'delivered'}]}).toArray();
+             res.send(result)
+           })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
