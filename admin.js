@@ -132,7 +132,9 @@ async function run() {
         }
 
         if (data.status === 'approve') {
-          await products.insertOne(data);
+          const withOutId = {...data};
+          delete withOutId['_id'];
+          await products.insertOne(withOutId);
           await pendingProduct.deleteOne({ _id: id });
           await notification.insertOne(notif);
         } else if (data.status === 'denied') {
