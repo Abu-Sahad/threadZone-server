@@ -5,7 +5,7 @@ const sellerRouter = express.Router();
 
 async function run() {
     try {
-        await client.connect();
+        client.connect();
         const usersCollection = client.db('threadZone').collection('users')
 
 
@@ -51,13 +51,13 @@ async function run() {
             .post(async (req, res) => {
                 const data = req.body;
                 //
-                 console.log('product data', data);
+                console.log('product data', data);
                 const result = await pendingProduct.insertOne(data);
 
                 const notif = {
-                  role:'admin',
-                  isRead:false,
-                  description:`${data.shopName} shop want to add a Product`,
+                    role: 'admin',
+                    isRead: false,
+                    description: `${data.shopName} shop want to add a Product`,
                 }
                 await notification.insertOne(notif);
 
@@ -68,8 +68,8 @@ async function run() {
         sellerRouter.route('/sellerOrderRequest')
             .post(async (req, res) => {
                 const shopId = req.body.shopId;
-                 const result = await orders.find({$and:[{shopId:shopId},{$or:[{status:'approved'},{status:'warehouse'}]}]}).toArray();
-              //  const result = await orders.find({ $or: [{ status: 'approved' }, { status: 'warehouse' }] }).toArray();
+                const result = await orders.find({ $and: [{ shopId: shopId }, { $or: [{ status: 'approved' }, { status: 'warehouse' }] }] }).toArray();
+                //  const result = await orders.find({ $or: [{ status: 'approved' }, { status: 'warehouse' }] }).toArray();
                 res.send(result);
             })
 
@@ -78,25 +78,25 @@ async function run() {
                 const id = new ObjectId(req.body.id);
                 await orders.updateOne({ _id: id }, { $set: { status: 'warehouse' } });
                 res.send({ status: true });
-                const data = await orders.findOne({_id:id});
+                const data = await orders.findOne({ _id: id });
 
                 //notification
                 const notif = {
-                  role:'customer',
-                  isRead:false,
-                  shopId:data.shopId,
-                  userId:data.userId,
-                  description:`your ordered ${data.productName} product from ${data.shopName} shop is reached to warehouse`
+                    role: 'customer',
+                    isRead: false,
+                    shopId: data.shopId,
+                    userId: data.userId,
+                    description: `your ordered ${data.productName} product from ${data.shopName} shop is reached to warehouse`
                 }
-                  await notification.insertOne(notif);
+                await notification.insertOne(notif);
 
-                 // admin notification
-                  const notif2 = {
-                    role:'admin',
-                    isRead:false,
-                    description:` ${data.productName} product from ${data.shopName} shop is reached to warehouse`
-                  }
-                    await notification.insertOne(notif2);
+                // admin notification
+                const notif2 = {
+                    role: 'admin',
+                    isRead: false,
+                    description: ` ${data.productName} product from ${data.shopName} shop is reached to warehouse`
+                }
+                await notification.insertOne(notif2);
 
             })
 

@@ -5,7 +5,7 @@ const productRouter = express.Router();
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+     client.connect();
     const product = client.db('threadZone').collection('products')
 
    //? Code Start Here
