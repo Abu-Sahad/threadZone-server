@@ -24,18 +24,10 @@ async function run() {
       }
     },
     {
-      $sort: { _id: 1 } // Sort by date in ascending order
+      $sort: { _id: 1 }
     }
   ];
-     //   if(role==='seller'){
-     // const shopId = req.body.shopId;
-     //   const match = {
-     //     $match: {
-     //     shopId: shopId
-     //    }
-     //  }
-     //  aggregationPipeline.push(match)
-     //  }
+
 
     const result = await orders.aggregate(aggregationPipeline).toArray();
       res.send(result);
@@ -86,16 +78,6 @@ async function run() {
            }
          }
        ]
-
-    // if(role==='seller'){
-    //   const shopId = req.body.shopId;
-    //     const match = {
-    //       $match: {
-    //       shopId: shopId
-    //      }
-    //    }
-    //    aggregationPipeline.push(match)
-    // }
       const result = await products.aggregate(aggregationPipeline).toArray();
       res.send(result);
 
@@ -130,27 +112,14 @@ async function run() {
           }
         ];
 
-        // if(role==='seller'){
-        //   const shopId = req.body.shopId;
-        //   const match = {
-        //     $match: {
-        //       shopId: shopId
-        //     }
-        //   };
-        //   pipeLine.push(match);
-        // }
-
         const result = await products.aggregate(pipeLine).toArray();
         res.send(result);
       })
 
 
-        // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
       } finally {
-        // Ensures that the client will close when you finish/error
-        //await client.close();
       }
     }
     run().catch(console.dir);

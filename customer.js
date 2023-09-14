@@ -143,7 +143,7 @@ async function run() {
         customerRouter.route('/submitOrder')
             .post(async (req, res) => {
                 const data = req.body;
-
+                  console.log("order data  ",data);
                 //  console.log("order List ",data);
                 for (var i = 0; i < data.length; i++) {
                     const id = new ObjectId(data[i].productId)
@@ -162,9 +162,7 @@ async function run() {
                       description:`${data[i].userName} want to buy ${data[i].productName} from your shop`
                     }
                       await notification.insertOne(notif);
-
                 }
-
                 orderList.insertMany(data);
                 res.send({ success: true });
             })
@@ -240,11 +238,14 @@ async function run() {
 
         customerRouter.route('/getReviewList')
             .post(async (req, res) => {
+                console.log("user info ",req.body);
                 try {
                     const role = req.body.role;
+
                     if (role === 'customer') {
                         const userId = req.body.userId;
-                        const result = await review.find({ $and: [{ userId: userId }, { status: 'reviewed' }] }).toArray();
+                        const result = await review.find({ $and: [{ userId: userId },{status:'reviewed'}] }).toArray();
+                      // const result = await review.find({userId}).toArray();
                         //  console.log('Review List ',result);
                         res.send(result)
                     } else if (role === 'seller') {
@@ -256,7 +257,6 @@ async function run() {
                         res.send(result);
                     }else if(role==='product'){
                       const productId = req.body.productId;
-                    //  const result = await await review.find({$and:[{ status: 'reviewed' },{productId}]}).toArray();
                    const result = await review
                    .find({ status: 'reviewed' })
                    .project({userName:true,userImage:true,description:true,image:true,rating:true})
@@ -288,11 +288,11 @@ async function run() {
               const role = data.role;
               let result;
              if(role==='admin'){
-               result = await notification.find({role:'admin'}).toArray();
+               result = await notification.find({role:'admin'}).sort({_id:-1}).toArray();
              }else if(role==='customer'){
-               result = await notification.find({$and:[{userId:data.userId},{role:'customer'}]}).toArray();
+               result = await notification.find({$and:[{userId:data.userId},{role:'customer'}]}).sort({_id:-1}).toArray();
              }else if(role==='seller'){
-               result = await notification.find({$and:[{shopId:data.shopId},{role:'seller'}]}).toArray();
+               result = await notification.find({$and:[{shopId:data.shopId},{role:'seller'}]}).sort({_id:-1}).toArray();
              }
              res.send(result);
             })
@@ -301,22 +301,35 @@ async function run() {
             customerRouter.route('/getSingleProduct')
             .post(async(req,res)=>{
               const id = new ObjectId(req.body.productId);
-             const result = await product.find({_id:id}).toArray();
-              // console.log('get single product ',id,result);
+             const result = await product.findOne({_id:id});
+             //console.log("single product ",result);
               res.send(result);
             })
 
 
            customerRouter.route('/getAllShop')
            .get(async(req,res)=>{
-             const result = await shop.find().toArray();
+             const result = await shop.find().sort({_id:-1}).toArray();
              res.send(result);
            })
 
            customerRouter.route('/getPreviousOrder')
            .post(async(req,res)=>{
-             const result = await orderList.find({$and:[{userId:req.body.userId},{status:'delivered'}]}).toArray();
+             const result = await orderList.find({$and:[{userId:req.body.userId},{status:'delivered'}]}).sort({_id:-1}).toArray();
              res.send(result)
+           })
+
+           customerRouter.route('/productInformation')
+           .post(async(req,res)=>{
+             const category = req.body.categoryName;
+           })
+
+           customerRouter.route('/getCustomerOrderList')
+           .post(async(req,res)=>{
+             const userId = req.body.userId;
+             console.log("user Id ",userId);
+             const result = await orderList.find({userId}).sort({_id:-1}).toArray();
+             res.send(result);
            })
 
         // Send a ping to confirm a successful connection
